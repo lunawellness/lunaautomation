@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: luna-wellness-automation
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/data.db
+    disk:
+      name: luna-data
+      mountPath: /data
+      sizeGB: 1
