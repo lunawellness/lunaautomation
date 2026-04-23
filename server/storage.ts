@@ -4,8 +4,16 @@ import { eq, desc, and, isNull, isNotNull } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import { clients, automationLogs, settings } from "@shared/schema";
 import type { Client, InsertClient, AutomationLog, InsertLog, Setting, InsertSetting } from "@shared/schema";
+import { mkdirSync, existsSync } from "fs";
+import { dirname, resolve } from "path";
 
-const dbPath = process.env.DB_PATH || "data.db";
+// Ensure the DB directory exists before opening (critical for Render /tmp paths)
+const dbPath = resolve(process.env.DB_PATH || "data.db");
+const dbDir = dirname(dbPath);
+if (!existsSync(dbDir)) {
+  mkdirSync(dbDir, { recursive: true });
+}
+console.log(`[DB] Opening database at: ${dbPath}`);
 const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite, { schema });
 
