@@ -110,15 +110,21 @@ export async function testConnection(): Promise<{ ok: boolean; message: string }
   }
 
   try {
+    // Sites endpoint only needs API-Key + SiteId header, no user token
+    const { apiKey, siteId } = getMBConfig();
     const res = await axios.get(`${MB_BASE}/site/sites`, {
       params: { SiteIds: siteId },
-      headers: getHeaders(null),
+      headers: {
+        "API-Key": apiKey,
+        "SiteId": siteId,
+        "Content-Type": "application/json",
+      },
     });
     const site = res.data?.Sites?.[0];
     if (site) {
-      return { ok: true, message: `Connected to: ${site.Name || "MINDBODY site " + siteId}` };
+      return { ok: true, message: `Connected ✔ Site: "${site.Name}" (ID: ${site.Id})` };
     }
-    return { ok: true, message: "Connected to MINDBODY (sandbox)" };
+    return { ok: true, message: "Connected to MINDBODY sandbox" };
   } catch (err: any) {
     const errMsg = err?.response?.data?.Error?.Message || err.message;
     return { ok: false, message: errMsg };
