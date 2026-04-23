@@ -270,21 +270,117 @@ export async function registerRoutes(httpServer: Server, app: Express) {
 
 // ─── HTML PAGES ──────────────────────────────────────────────────────────────
 function thankYouPage(firstName: string, rating: number, isFiveStar: boolean): string {
-  const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+  const filledStars = "★".repeat(rating);
+  const emptyStars = "☆".repeat(5 - rating);
+  const name = firstName ? `, ${firstName}` : "";
+
+  const message = isFiveStar
+    ? `We're so glad you had a five-star experience. We've just sent you a follow-up email with a special thank-you — check your inbox.`
+    : `We appreciate your honest feedback. It helps us grow and make every visit better than the last.`;
+
   return `<!DOCTYPE html>
-<html><head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Thank You — Luna Wellness Centre</title>
-</head>
-<body style="margin:0;padding:0;background:#F7F6F2;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;">
-  <div style="max-width:480px;width:90%;text-align:center;padding:48px 32px;background:#fff;border-radius:16px;box-shadow:0 2px 24px rgba(0,0,0,0.08);">
-    <div style="font-size:48px;color:#F5A623;margin-bottom:16px;">${stars}</div>
-    <h1 style="color:#01696F;font-size:24px;margin:0 0 12px;">Thank you${firstName ? `, ${firstName}` : ""}!</h1>
-    ${isFiveStar
-      ? `<p style="color:#28251D;font-size:16px;line-height:1.6;margin:0 0 24px;">We're so glad you had a wonderful experience. Check your inbox — we've sent you a special thank-you with a $25 account credit offer.</p>`
-      : `<p style="color:#28251D;font-size:16px;line-height:1.6;margin:0 0 24px;">We appreciate your honest feedback — it helps us improve every day. We hope to make your next visit even better.</p>`
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #F7F6F2;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
     }
-    <p style="color:#7A7974;font-size:14px;margin:0;">Luna Wellness Centre · Chilliwack, BC</p>
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      max-width: 460px;
+      width: 100%;
+      overflow: hidden;
+      text-align: center;
+    }
+    .header {
+      background: #01696F;
+      padding: 28px 32px 24px;
+    }
+    .header-title {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .header-sub {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .body {
+      padding: 40px 36px 36px;
+    }
+    .stars {
+      font-size: 52px;
+      line-height: 1;
+      margin-bottom: 20px;
+      letter-spacing: 4px;
+    }
+    .stars .filled { color: #F5A623; }
+    .stars .empty  { color: #D4D1CA; }
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #28251D;
+      margin-bottom: 14px;
+    }
+    .message {
+      font-size: 15px;
+      color: #7A7974;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #F0EFEB;
+      margin-bottom: 20px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #BAB9B4;
+    }
+    .checkmark {
+      width: 56px;
+      height: 56px;
+      background: #E6F3F3;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 26px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="header-title">Luna Wellness Centre</div>
+      <div class="header-sub">Chilliwack, BC</div>
+    </div>
+    <div class="body">
+      <div class="stars">
+        <span class="filled">${filledStars}</span><span class="empty">${emptyStars}</span>
+      </div>
+      <div class="title">Thank you${name}!</div>
+      <p class="message">${message}</p>
+      <hr class="divider">
+      <div class="footer">Luna Wellness Centre &nbsp;·&nbsp; Chilliwack, BC</div>
+    </div>
   </div>
-</body></html>`;
+</body>
+</html>`;
 }
