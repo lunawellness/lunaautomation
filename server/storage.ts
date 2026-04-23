@@ -5,13 +5,7 @@ import * as schema from "@shared/schema";
 import { clients, automationLogs, settings } from "@shared/schema";
 import type { Client, InsertClient, AutomationLog, InsertLog, Setting, InsertSetting } from "@shared/schema";
 
-import { mkdirSync } from "fs";
-import { dirname } from "path";
-
 const dbPath = process.env.DB_PATH || "data.db";
-// Ensure the directory exists (needed for Render persistent disk)
-const dbDir = dirname(dbPath);
-if (dbDir && dbDir !== ".") mkdirSync(dbDir, { recursive: true });
 const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite, { schema });
 

@@ -7,9 +7,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DB_PATH
-        value: /data/data.db
-    disk:
-      name: luna-data
-      mountPath: /data
-      sizeGB: 1
