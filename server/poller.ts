@@ -85,7 +85,7 @@ export async function runReviewPoller() {
       });
 
       // Send credit confirmation + rebooking email to client
-      const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscentre.ca/book";
+      const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscenter.ca/float-therapy-booking";
       const creditEmailSent = await sendCreditConfirmationEmail({
         firstName: matchedClient.firstName,
         email: matchedClient.email,

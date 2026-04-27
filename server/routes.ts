@@ -224,7 +224,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
     if (!client) return res.status(404).json({ error: "Client not found" });
 
     const now = new Date().toISOString();
-    const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscentre.ca/book";
+    const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscenter.ca/float-therapy-booking";
 
     // Apply $25 credit in MINDBODY
     const creditApplied = await applyAccountCredit({
