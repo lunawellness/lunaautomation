@@ -1,8 +1,8 @@
 import type { Express, Request, Response } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
-import { sendFeedbackEmail, sendReviewRequestEmail } from "./email";
-import { isFirstVisit, testConnection } from "./mindbody";
+import { sendFeedbackEmail, sendReviewRequestEmail, sendCreditConfirmationEmail } from "./email";
+import { isFirstVisit, testConnection, applyAccountCredit } from "./mindbody";
 import { runReviewPoller } from "./poller";
 
 export async function registerRoutes(httpServer: Server, app: Express) {
@@ -215,6 +215,48 @@ export async function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/run-poller", async (_req: Request, res: Response) => {
     res.json({ started: true });
     runReviewPoller();
+  });
+
+  // ─── TEST: simulate full credit flow for a client ─────────────────────────
+  app.post("/api/test/simulate-credit", async (req: Request, res: Response) => {
+    const { client_id } = req.body as { client_id: string };
+    const client = storage.getAllClients().find(c => c.mindbodyClientId === client_id);
+    if (!client) return res.status(404).json({ error: "Client not found" });
+
+    const now = new Date().toISOString();
+    const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscentre.ca/book";
+
+    // Apply $25 credit in MINDBODY
+    const creditApplied = await applyAccountCredit({
+      mindbodyClientId: client.mindbodyClientId,
+      amount: 25,
+      note: "Google review reward — Luna Wellness $25 credit (test)",
+    });
+
+    // Send credit confirmation + rebooking email
+    const emailSent = await sendCreditConfirmationEmail({
+      firstName: client.firstName,
+      email: client.email,
+      serviceName: client.serviceName,
+      bookingUrl,
+    });
+
+    storage.updateClient(client.id, {
+      creditApplied,
+      creditPending: false,
+      creditAppliedAt: now,
+      creditConfirmationEmailSentAt: emailSent ? now : undefined,
+    });
+
+    storage.addLog({
+      clientId: client.id,
+      mindbodyClientId: client.mindbodyClientId,
+      event: "credit_applied",
+      details: JSON.stringify({ creditApplied, emailSent, amount: 25 }),
+      createdAt: now,
+    });
+
+    res.json({ success: true, creditApplied, emailSent });
   });
 
   // ─── MINDBODY TEST CONNECTION ─────────────────────────────────────────────
