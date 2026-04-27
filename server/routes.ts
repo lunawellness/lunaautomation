@@ -181,7 +181,9 @@ export async function registerRoutes(httpServer: Server, app: Express) {
       return res.status(400).json({ error: "firstName and email required" });
     }
 
-    const testClientId = `TEST-${Date.now()}`;
+    // Use provided mindbodyClientId if given (for live credit testing), otherwise generate a test ID
+    const { mindbodyClientId: providedMbId } = req.body as { mindbodyClientId?: string };
+    const testClientId = providedMbId || `TEST-${Date.now()}`;
     const now = new Date().toISOString();
 
     const client = storage.createClient({
