@@ -35,9 +35,13 @@ db.run(`CREATE TABLE IF NOT EXISTS clients (
   credit_applied_at TEXT,
   review_detected_at TEXT,
   review_text TEXT,
+  credit_confirmation_email_sent_at TEXT,
   created_at TEXT NOT NULL,
   staff_notified_at TEXT
 )`);
+
+// Add new column if upgrading existing DB (safe no-op if already exists)
+try { db.run(`ALTER TABLE clients ADD COLUMN credit_confirmation_email_sent_at TEXT`); } catch (_) {}
 
 db.run(`CREATE TABLE IF NOT EXISTS automation_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

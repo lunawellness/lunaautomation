@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { storage } from "./storage";
 import { getRecentReviews, matchReviewToClient, refreshAccessToken } from "./google-reviews";
 import { applyAccountCredit } from "./mindbody";
-import { sendStaffCreditNotification } from "./email";
+import { sendStaffCreditNotification, sendCreditConfirmationEmail } from "./email";
 
 let pollerRunning = false;
 
@@ -83,6 +83,26 @@ export async function runReviewPoller() {
         }),
         createdAt: now,
       });
+
+      // Send credit confirmation + rebooking email to client
+      const bookingUrl = storage.getSetting("booking_url") || "https://www.lunawellnesscentre.ca/book";
+      const creditEmailSent = await sendCreditConfirmationEmail({
+        firstName: matchedClient.firstName,
+        email: matchedClient.email,
+        serviceName: matchedClient.serviceName || "Float Session",
+        bookingUrl,
+      });
+
+      if (creditEmailSent) {
+        storage.updateClient(matchedClient.id, { creditConfirmationEmailSentAt: now });
+        storage.addLog({
+          clientId: matchedClient.id,
+          mindbodyClientId: matchedClient.mindbodyClientId,
+          event: "credit_confirmation_email_sent",
+          details: JSON.stringify({ to: matchedClient.email, bookingUrl }),
+          createdAt: now,
+        });
+      }
 
       // Notify staff
       const notified = await sendStaffCreditNotification({

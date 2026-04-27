@@ -22,6 +22,7 @@ export const clients = sqliteTable("clients", {
   creditAppliedAt: text("credit_applied_at"),
   reviewDetectedAt: text("review_detected_at"),
   reviewText: text("review_text"),
+  creditConfirmationEmailSentAt: text("credit_confirmation_email_sent_at"),
   // Meta
   createdAt: text("created_at").notNull(),
   staffNotifiedAt: text("staff_notified_at"),

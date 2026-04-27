@@ -171,6 +171,75 @@ export async function sendReviewRequestEmail(params: {
   }
 }
 
+export async function sendCreditConfirmationEmail(params: {
+  firstName: string;
+  email: string;
+  serviceName: string;
+  bookingUrl: string;
+}): Promise<boolean> {
+  const appPassword = storage.getSetting("gmail_app_password");
+  if (!appPassword) return false;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F7F6F2;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F2;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;">
+        <tr><td style="background:#01696F;padding:32px 40px;">
+          <p style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;letter-spacing:1px;">LUNA WELLNESS CENTRE</p>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:13px;">Chilliwack, BC</p>
+        </td></tr>
+        <tr><td align="center" style="padding:24px;background:#E6F3F3;">
+          <p style="margin:0;font-size:36px;">🎉</p>
+          <p style="margin:8px 0 0;font-size:16px;font-weight:bold;color:#01696F;">Your $25 credit has been added!</p>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <p style="margin:0 0 20px;font-size:18px;font-weight:bold;color:#28251D;">Hi ${params.firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:#28251D;line-height:1.6;">We saw your Google review and it genuinely made our whole team smile. Thank you for taking the time — it means more than you know.</p>
+          <p style="margin:0 0 28px;font-size:15px;color:#28251D;line-height:1.6;">As promised, a <strong>$25 account credit</strong> has been applied to your MINDBODY account. It's ready and waiting for your next visit.</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+            <tr><td style="background:#E6F3F3;border:2px solid #01696F;border-radius:8px;padding:24px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:28px;font-weight:bold;color:#01696F;">$25 Credit</p>
+              <p style="margin:0;font-size:13px;color:#7A7974;">Applied to your account · No code needed · Use on any service</p>
+            </td></tr>
+          </table>
+          <p style="margin:0 0 20px;font-size:15px;color:#28251D;line-height:1.6;">Ready to book your next <strong>${params.serviceName}</strong>? Your credit will apply automatically at checkout.</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
+            <tr><td align="center">
+              <a href="${params.bookingUrl}" style="display:inline-block;background:#01696F;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;padding:16px 40px;border-radius:8px;">Book Your Next Session →</a>
+            </td></tr>
+          </table>
+          <p style="margin:0 0 4px;font-size:15px;color:#28251D;">See you soon,</p>
+          <p style="margin:0;font-size:15px;font-weight:bold;color:#01696F;">The Luna Wellness Team</p>
+        </td></tr>
+        <tr><td style="padding:20px 40px;background:#F7F6F2;border-top:1px solid #D4D1CA;">
+          <p style="margin:0;font-size:12px;color:#7A7974;">Luna Wellness Centre · Chilliwack, BC · <a href="https://www.lunawellnesscentre.ca" style="color:#01696F;">lunawellnesscentre.ca</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail({
+      from: `"Luna Wellness Centre" <${getFromEmail()}>`,
+      to: params.email,
+      subject: `Your $25 credit is on your account, ${params.firstName} 🎉`,
+      html,
+    });
+    console.log(`[Email] Credit confirmation email sent to ${params.email}`);
+    return true;
+  } catch (err: any) {
+    console.error("[Email] Gmail error (credit confirmation):", err.message);
+    return false;
+  }
+}
+
 export async function sendStaffCreditNotification(params: {
   clientFirstName: string;
   clientLastName: string;

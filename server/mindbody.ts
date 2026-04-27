@@ -24,10 +24,15 @@ async function getStaffToken(): Promise<string | null> {
     return null;
   }
 
-  // For sandbox we use the known sandbox staff credentials
-  // For production these will come from settings
-  const username = storage.getSetting("mindbody_staff_username") || "mindbodysandboxsite@gmail.com";
-  const password = storage.getSetting("mindbody_staff_password") || "Apitest1234";
+  // Staff credentials — set in settings for production, falls back to sandbox defaults
+  const isSandbox = siteId === "-99" || siteId === -99;
+  const username = storage.getSetting("mindbody_staff_username") || (isSandbox ? "mindbodysandboxsite@gmail.com" : "");
+  const password = storage.getSetting("mindbody_staff_password") || (isSandbox ? "Apitest1234" : "");
+
+  if (!username || !password) {
+    console.warn("[MINDBODY] No staff credentials configured — skipping staff token");
+    return null;
+  }
 
   try {
     const res = await axios.post(
